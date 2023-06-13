@@ -1,3 +1,9 @@
+# 個人のデータを入れないための設定
+data/*
+!data/sample_data.*
+output/*
+!output/_bill_splitting_sample.xlsx
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
