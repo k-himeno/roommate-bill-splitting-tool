@@ -10,6 +10,8 @@ black = "*"
 flake8 = "*"
 openpyxl = "*"
 xlrd = "*"
+beautifulsoup4 = "*"
+requests = "*"
 
 [dev-packages]
 ipykernel = "*"

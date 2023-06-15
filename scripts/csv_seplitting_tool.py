@@ -116,22 +116,37 @@ def save_bill_splitting_data(data, filename="bill_splitting.xlsx", user="U1"):
         data.to_excel(writer, sheet_name=user)
 
 
-# os.chdir(os.path.abspath(__file__))
-data_folder = os.path.join("data")
+def read_csv_from_money_forward(data_folder: str):
+    """マネーフォワードから出力されたcsvファイルを読み込む．
 
-# 編集後のデータを保存するフォルダ
-output_folder = os.path.join("output")
+    Args:
+        data_folder (str): フォルダ名
+    """
+    first = True
+    for data_file_i in os.listdir(data_folder):
+        if data_file_i.endswith(".csv"):
+            data_i = pd.read_csv(os.path.join(data_folder, data_file_i), encoding="shift-jis", index_col="ID")
+        if first:
+            data = data_i
+            first = False
+        else:
+            data = pd.concat([data, data_i], axis=0)
+    return data
 
-# 割り勘のためのフラグ
-bill_splitting_flag = ["阿良々木割勘", "阿良々木割り勘"]
-space = "\s*　*"
-bill_splitting_flag = space + "|".join(bill_splitting_flag) + space
 
-# マネーフォワードから入力されたファイルを読み込む．
-# data_file_i = pd.read_csv(os.path.join(data_folder, "sample_data.csv"), encoding="shift-jis")
+if __name__ == "__main__":
+    # os.chdir(os.path.abspath(__file__))
+    data_folder = os.path.join("data")
 
-data_i = pd.read_csv(os.path.join(data_folder, "sample_data.csv"), encoding="shift-jis", index_col="ID")
+    # 編集後のデータを保存するフォルダ
+    output_folder = os.path.join("output")
 
-data = data_i
+    # 割り勘のためのフラグ
+    bill_splitting_flag = ["阿良々木割勘", "阿良々木割り勘"]
+    space = "\s*　*"
+    bill_splitting_flag = space + "|".join(bill_splitting_flag) + space
 
-save_bill_splitting_data(data, filename=os.path.join(output_folder, "_bill_splitting_sample.xlsx"), user="U1")
+    # マネーフォワードから入力されたファイルを読み込む．
+    data = read_csv_from_money_forward(data_folder)
+
+    save_bill_splitting_data(data, filename=os.path.join(output_folder, "_bill_splitting_sample.xlsx"), user="U1")

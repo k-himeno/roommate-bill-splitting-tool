@@ -3,6 +3,7 @@ data/*
 !data/sample_data.*
 output/*
 !output/_bill_splitting_sample.xlsx
+private/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
