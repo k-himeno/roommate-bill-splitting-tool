@@ -122,12 +122,20 @@ def get_monthly_finances_csv(session, from_year, from_month, save_path: str):
         data_date += relativedelta(months=1)
 
 
-username = "hogehoge"
-password = "1234"
+if __name__ == "__main__":
+    # 適宜書き換え
+    # login情報
+    username = "hogehoge"
+    password = "1234"
 
+    # ダウンロードする期間と場所
+    from_year = 2022
+    from_month = 5
+    save_path = os.path.join("private", "downloaded_csv")
 
-session = start_mf_session(username=username, password=password)
-
-get_monthly_finances_csv(session, from_year=2022, from_month=5, save_path=os.path.join("private", "downloaded_csv"))
-
-session.close()
+    # ログイン
+    session = start_mf_session(username=username, password=password)
+    # ダウンロード
+    get_monthly_finances_csv(session, from_year=from_year, from_month=from_month, save_path=save_path)
+    # ログインsessionを閉じる
+    session.close()
