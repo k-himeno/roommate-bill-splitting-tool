@@ -116,16 +116,17 @@ def save_bill_splitting_data(data, filename="bill_splitting.xlsx", user="U1"):
         data.to_excel(writer, sheet_name=user)
 
 
-def read_csv_from_money_forward(data_folder: str):
+def read_csv_from_money_forward(data_folder: str, encoding="utf-8"):
     """マネーフォワードから出力されたcsvファイルを読み込む．
 
     Args:
         data_folder (str): フォルダ名
+        encoding (str, optional): エンコード.文字化けするときはshift-jisに． Defaults to "utf-8".
     """
     first = True
     for data_file_i in os.listdir(data_folder):
         if data_file_i.endswith(".csv"):
-            data_i = pd.read_csv(os.path.join(data_folder, data_file_i), encoding="shift-jis", index_col="ID")
+            data_i = pd.read_csv(os.path.join(data_folder, data_file_i), encoding=encoding, index_col="ID")
         if first:
             data = data_i
             first = False
@@ -147,6 +148,7 @@ if __name__ == "__main__":
     bill_splitting_flag = space + "|".join(bill_splitting_flag) + space
 
     # マネーフォワードから入力されたファイルを読み込む．
-    data = read_csv_from_money_forward(data_folder)
+    # ブラウザを使い手動でダウンロードしてきた場合は，エンコードをshift-jisにする．
+    data = read_csv_from_money_forward(data_folder, encoding="shift-jis")
 
     save_bill_splitting_data(data, filename=os.path.join(output_folder, "_bill_splitting_sample.xlsx"), user="U1")
