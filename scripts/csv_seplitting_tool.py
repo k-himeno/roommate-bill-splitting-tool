@@ -28,6 +28,11 @@ def get_bill_splitting_data(data, bill_splitting_data, bill_splitting_flag):
     data_for_write = data.loc[bill_splitting_idx]
     if data_for_write.empty:
         sys.exit("全てのデータが記入済みです")
+    # メモの中身を分割する．
+    data_for_write = pd.concat(
+        [data_for_write, data_for_write["メモ"].str.split(bill_splitting_flag, expand=True)], axis=1
+    ).drop(columns="メモ")
+    data_for_write.rename(columns={0: "メモ", 1: "割勘比率"}, inplace=True)
     return data_for_write
 
 
@@ -42,10 +47,6 @@ def format_bill_splitting_data(data, user="U1"):
 
     columns_to_remove = ["計算対象", "保有金融機関", "振替"]
     data = data.drop(columns=columns_to_remove)
-
-    # メモの中身を分割する．
-    data = pd.concat([data, data["メモ"].str.split(bill_splitting_flag, expand=True)], axis=1).drop(columns="メモ")
-    data.rename(columns={0: "メモ", 1: "割勘比率"}, inplace=True)
 
     # 割り勘比率を分割する．
     data = pd.concat([data, data["割勘比率"].str.split(":|;", expand=True)], axis=1).drop(columns="割勘比率")
@@ -75,11 +76,12 @@ def format_bill_splitting_data(data, user="U1"):
 
 
 # 割勘用のデータをExcel形式に成形し，保存する．
-def save_bill_splitting_data(data, filename="bill_splitting.xlsx", user="U1"):
+def save_bill_splitting_data(data, bill_splitting_flag: str, filename="bill_splitting.xlsx", user="U1"):
     """割り勘用のデータをExcel形式に成形し，保存する．
 
     Args:
         data (DataFrame): 割り勘用のデータ．
+        bill_splitting_flag (str): メモに含まれる文字列．割勘に使うことを示す文字列．正規表現
         bill_splitting_file (str): 保存先のExcelファイル名
         user (str, optional): 割り勘の負担者．"U1" or "U2". Defaults to "U1".
     """
@@ -101,9 +103,8 @@ def save_bill_splitting_data(data, filename="bill_splitting.xlsx", user="U1"):
     else:
         bill_splitting_data = pd.DataFrame()
 
-    # 割り勘をするデータを取り出す．過去に入力したデータは除く
+    # 割り勘をするデータを取り出す．過去に入力したデータも削除する．
     data_for_write = get_bill_splitting_data(data, bill_splitting_data, bill_splitting_flag)
-
     # データを成形する．
     data = format_bill_splitting_data(data_for_write, user=user)
 
@@ -144,8 +145,10 @@ if __name__ == "__main__":
 
     # 割り勘のためのフラグ
     bill_splitting_flag = ["阿良々木割勘", "阿良々木割り勘"]
-    space = "\s*　*"
-    bill_splitting_flag = space + "|".join(bill_splitting_flag) + space
+    space = "\s*"
+
+    bill_splitting_flag = ["".join([space, flag, space]) for flag in bill_splitting_flag]
+    bill_splitting_flag = "|".join(bill_splitting_flag)
 
     # マネーフォワードから入力されたファイルを読み込む．
     # ブラウザを使い手動でダウンロードしてきた場合は，エンコードをshift-jisにする．
