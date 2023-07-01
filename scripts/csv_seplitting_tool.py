@@ -111,6 +111,7 @@ def save_bill_splitting_data(data, bill_splitting_flag: str, filename="bill_spli
     # データを結合する
     data = pd.concat([bill_splitting_data, data], axis=0)
     # dataを日付でソートする
+    data["日付"] = pd.to_datetime(data["日付"], format="%Y/%m/%d", errors="coerce")
     data = data.sort_values(by="日付", ascending=False)
     # DataFrameをExcelのSheet1に書き込む
     with pd.ExcelWriter(filename, engine="openpyxl", mode="a", if_sheet_exists="replace") as writer:
