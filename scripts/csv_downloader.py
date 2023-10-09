@@ -29,20 +29,15 @@ def start_mf_session(username, password):
         password (str): パスワード
     """
 
-    login_url = "https://moneyforward.com/login"
     sign_in_url = "https://moneyforward.com/sign_in"
-    mail_login_url = "https://id.moneyforward.com/sign_in/email?"
+    mail_login_url = "https://id.moneyforward.com/sign_in?"
 
     # セッションのインスタンスを作成する。
     session = requests.Session()
 
-    # login 画面
-    login_response = assert_get(login_url, session)
-    login_soup = BeautifulSoup(login_response.text)
-
     # sign_in 画面 の script タグの中にあるパスを取得する。メールでログインするため．
     sign_in_response = assert_get(sign_in_url, session)
-    sign_in_soup = BeautifulSoup(sign_in_response.text)
+    sign_in_soup = BeautifulSoup(sign_in_response.text, "html.parser")
     mail_login_path = sign_in_soup.find("script")
 
     # query を取得する
@@ -61,7 +56,7 @@ def start_mf_session(username, password):
     # query を整形する
     # トークンを取得するために，ログインページを取得する
     mail_login_url_response = assert_get(mail_login_url + mail_login_query, session)
-    mail_login_url_soup = BeautifulSoup(mail_login_url_response.text)
+    mail_login_url_soup = BeautifulSoup(mail_login_url_response.text, "html.parser")
     authenticity_token = mail_login_url_soup.find("meta", {"name": "csrf-token"})["content"]
 
     # post用にクエリを成形する．
@@ -79,7 +74,7 @@ def start_mf_session(username, password):
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
     assert top_page_response.status_code == 200, "POSTリクエストが失敗しました．\nstatus code: " + str(top_page_response.status_code)
-    top_page_soup = BeautifulSoup(top_page_response.text)
+    top_page_soup = BeautifulSoup(top_page_response.text, "html.parser")
 
     return session
 
