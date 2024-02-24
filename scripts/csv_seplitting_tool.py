@@ -8,13 +8,15 @@ import pandas as pd
 from openpyxl import load_workbook
 
 
-def get_bill_splitting_data(data, bill_splitting_data, bill_splitting_flag):
+def get_bill_splitting_data(
+    data: pd.DataFrame, bill_splitting_data: pd.DataFrame, bill_splitting_flag: str
+) -> pd.DataFrame:
     """割り勘をするデータを取り出す．過去に入力したデータは除く．
 
     Args:
         data (DataFrame): 新しく記入したいデータ．
         bill_splitting_data (DataFrame): 過去に記入済みのデータ．
-        bill_splitting_flag (list): リスト中の文字列がメモに含まれている場合，割り勘として扱う．
+        bill_splitting_flag (str): リスト中の文字列がメモに含まれている場合，割り勘として扱う．
 
     Returns:
         data_frame: Dataから割り勘として扱うデータを切り出したもの．
@@ -37,7 +39,7 @@ def get_bill_splitting_data(data, bill_splitting_data, bill_splitting_flag):
 
 
 # 割り勘に必要なデータを切り出し，成形する．
-def format_bill_splitting_data(data, user="U1"):
+def format_bill_splitting_data(data: pd.DataFrame, user: str = "U1") -> pd.DataFrame:
     """割り勘をするデータをフォーマットする
 
     Args:
@@ -76,7 +78,9 @@ def format_bill_splitting_data(data, user="U1"):
 
 
 # 割勘用のデータをExcel形式に成形し，保存する．
-def save_bill_splitting_data(data, bill_splitting_flag: str, filename="bill_splitting.xlsx", user="U1"):
+def save_bill_splitting_data(
+    data: pd.DataFrame, bill_splitting_flag: str, filename: str = "bill_splitting.xlsx", user: str = "U1"
+) -> None:
     """割り勘用のデータをExcel形式に成形し，保存する．
 
     Args:
@@ -118,12 +122,15 @@ def save_bill_splitting_data(data, bill_splitting_flag: str, filename="bill_spli
         data.to_excel(writer, sheet_name=user)
 
 
-def read_csv_from_money_forward(data_folder: str, encoding="utf-8"):
+def read_csv_from_money_forward(data_folder: str, encoding: str = "utf-8") -> pd.DataFrame:
     """マネーフォワードから出力されたcsvファイルを読み込む．
 
     Args:
         data_folder (str): フォルダ名
         encoding (str, optional): エンコード.文字化けするときはshift-jisに． Defaults to "utf-8".
+
+    Returns:
+        pd.DataFrame: 読み込まれたデータ
     """
     first = True
     for data_file_i in os.listdir(data_folder):
@@ -149,10 +156,12 @@ if __name__ == "__main__":
     space = "\s*"
 
     bill_splitting_flag = ["".join([space, flag, space]) for flag in bill_splitting_flag]
-    bill_splitting_flag = "|".join(bill_splitting_flag)
+    bill_splitting_str = "|".join(bill_splitting_flag)
 
     # マネーフォワードから入力されたファイルを読み込む．
     # ブラウザを使い手動でダウンロードしてきた場合は，エンコードをshift-jisにする．
     data = read_csv_from_money_forward(data_folder, encoding="shift-jis")
 
-    save_bill_splitting_data(data, filename=os.path.join(output_folder, "_bill_splitting_sample.xlsx"), user="U1")
+    save_bill_splitting_data(
+        data, bill_splitting_str, filename=os.path.join(output_folder, "_bill_splitting_sample.xlsx"), user="U1"
+    )
