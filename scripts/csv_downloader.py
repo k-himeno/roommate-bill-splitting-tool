@@ -12,21 +12,26 @@ from bs4 import BeautifulSoup
 from dateutil.relativedelta import relativedelta
 
 
-def assert_get(url, session):
+def assert_get(url: str, session: requests.Session) -> requests.Response:
     """GETリクエストが成功したかどうかを確認する"""
     response = session.get(url)
-    assert response.status_code == 200, "GETリクエストが失敗しました\nstatus code: " + str(response.status_code) + "\nurl: " + url
+    assert response.status_code == 200, (
+        "GETリクエストが失敗しました\nstatus code: " + str(response.status_code) + "\nurl: " + url
+    )
     # お行儀をよくするために一秒まつ
     time.sleep(1)
     return response
 
 
-def start_mf_session(username, password):
+def start_mf_session(username: str, password: str) -> requests.Session | None:
     """マネーフォワードにログインしたsessionを張る
 
     Args:
         username (str): ID
         password (str): パスワード
+
+    Returns:
+        requests.Session: ログイン済みのセッション
     """
 
     sign_in_url = "https://moneyforward.com/sign_in"
@@ -73,18 +78,27 @@ def start_mf_session(username, password):
         data=mail_login_params,
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
-    assert top_page_response.status_code == 200, "POSTリクエストが失敗しました．\nstatus code: " + str(top_page_response.status_code)
-    top_page_soup = BeautifulSoup(top_page_response.text, "html.parser")
+    assert top_page_response.status_code == 200, "POSTリクエストが失敗しました．\nstatus code: " + str(
+        top_page_response.status_code
+    )
 
-    return session
+    # login の成功をcookieを見て確認する
+    cookie_names = [cookie.name for cookie in top_page_response.cookies]
+    if "identification_code" in cookie_names:
+        print("ログインに成功しました．")
+        return session
+    else:
+        session.close()
+        print("ログインに失敗しました．")
+        return None
 
 
 # download
-def get_monthly_finances_csv(session, from_year, from_month, save_path: str):
+def get_monthly_finances_csv(session: requests.Session, from_year: int, from_month: int, save_path: str) -> None:
     """マネーフォワードからCSVを取得する．
 
     Args:
-        session (_type_): すでにログイン済みのセッション
+        session (requests.Session): すでにログイン済みのセッション
         from_year (int): 開始年
         from_month (int): 開始月
         save_path (str): 保存するフォルダ名
@@ -120,6 +134,7 @@ def get_monthly_finances_csv(session, from_year, from_month, save_path: str):
 if __name__ == "__main__":
     # 適宜書き換え
     # login情報
+
     username = "hogehoge"
     password = "1234"
 

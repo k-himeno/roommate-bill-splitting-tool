@@ -6,8 +6,6 @@ name = "pypi"
 [packages]
 numpy = "*"
 pandas = "*"
-black = "*"
-flake8 = "*"
 openpyxl = "*"
 xlrd = "*"
 beautifulsoup4 = "*"
@@ -15,6 +13,8 @@ requests = "*"
 
 [dev-packages]
 ipykernel = "*"
+black = "*"
+flake8 = "*"
 
 [requires]
 python_version = "3.11"
