@@ -4,6 +4,7 @@ data/*
 output/*
 !output/_bill_splitting_sample.xlsx
 private/*
+scripts/moneyfoword_writer.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
