@@ -72,9 +72,11 @@ def get_firefox_cookie(username: str, profile: str, wsl: bool = True) -> request
     # 必要に応じてヘッダーを設定
     session.headers.update(
         {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:131.0) Gecko/20100101 Firefox/131.0",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.5",
+            "DNT": "1",  # Do Not Track ヘッダー
+            "Sec-GPC": "1",  # Global Privacy Control ヘッダー
             "Connection": "keep-alive",
             "Upgrade-Insecure-Requests": "1",
         }
