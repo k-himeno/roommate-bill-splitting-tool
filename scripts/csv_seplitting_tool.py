@@ -193,7 +193,12 @@ def calculate_bill_splitting(data_splitting_df: pd.DataFrame) -> pd.DataFrame:
     return data_splitting_df
 
 
-def save_bill_splitting_data(split_df: pd.DataFrame, xlsx_path: str, sheet_name: str, sort_by: str = "日付") -> None:
+def save_bill_splitting_data(
+    split_df: pd.DataFrame,
+    xlsx_path: str,
+    sheet_name: str,
+    sort_by: str = "日付",
+) -> None:
     """割勘DFを既存シートに追記して保存。
     既存シートが無ければ新規作成。
     あればアーカイブシートに退避。
@@ -205,6 +210,8 @@ def save_bill_splitting_data(split_df: pd.DataFrame, xlsx_path: str, sheet_name:
         sort_by (str, optional): ソートする列名. Defaults to "日付".
     """
     xlsx_path = str(xlsx_path)
+
+    # 既存シート読み込み（重複判定用）
     if os.path.exists(xlsx_path):
         existed = pd.read_excel(xlsx_path, sheet_name=sheet_name, index_col=0)
         existed["日付"] = pd.to_datetime(existed["日付"], errors="coerce").dt.strftime("%Y-%m-%d 00:00:00")
@@ -222,16 +229,23 @@ def save_bill_splitting_data(split_df: pd.DataFrame, xlsx_path: str, sheet_name:
     if sort_by in combined.columns:
         combined = combined.sort_values(sort_by, ascending=False)
 
-    # 既存をアーカイブ退避
-    if not existed.empty:
-        with pd.ExcelWriter(xlsx_path, engine="openpyxl", mode="a", if_sheet_exists="new") as w:
-            existed.to_excel(w, sheet_name=f"{sheet_name}_archive_{date.today():%Y-%m-%d}")
-
     combined.index.name = "ID"
 
-    # 置換保存
-    with pd.ExcelWriter(xlsx_path, engine="openpyxl", mode="a", if_sheet_exists="replace") as w:
-        combined.to_excel(w, sheet_name=sheet_name, index=True, na_rep="")
+    # アーカイブ名（重複回避）
+    archive_name = f"{sheet_name}_archive_{date.today():%Y-%m-%d}"
+
+    # ===== 保存を1回にまとめる =====
+    if os.path.exists(xlsx_path):
+        with pd.ExcelWriter(xlsx_path, engine="openpyxl", mode="a", if_sheet_exists="replace") as w:
+            # 既存データがある場合はアーカイブに退避（新規シートなので replace の影響を受けない）
+            # if not existed.empty:
+            #     existed.to_excel(w, sheet_name=archive_name)
+            # # 対象シートは置換保存（シートに書式が無い前提ならこれでOK）
+            combined.to_excel(w, sheet_name=sheet_name, index=True, na_rep="")
+    else:
+        # 新規作成（ファイルが無いなら書式保持の必要がないので通常書き込み）
+        with pd.ExcelWriter(xlsx_path, engine="openpyxl", mode="w") as w:
+            combined.to_excel(w, sheet_name=sheet_name, index=True, na_rep="")
 
 
 # ======== 追加：revolut用ユーティリティ =======================

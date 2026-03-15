@@ -18,21 +18,24 @@
 
 LoginをPythonだけでやるのは，ログイン画面が頻繁に変わるのでやめた．
 
-
-
 ## 必要要件
 
 - マネーフォワードの有料会員登録
 - Python環境
-    - 詳細はPipfileを参照．pipenvを用いている．
+  - 詳細はPipfileを参照．pipenvを用いている．
 
 ## 使い方
 
-
 1. プログラム上
     - Firefoxのcookieのパスを確認してパスを書き換える．
-2.  マネーフォワード上
+2. マネーフォワード上
     - 課金
     - 割勘する際はメモに `割勘フラグ 2:1` のように，割勘であることを示す文字列を記載し，スペースを開けて割勘の比率を記載する．左に記載した数値がU1, 右に記載した数値がU2の支出となるようになっている．メモに本来記載したい内容があれば，`割勘フラグ`の左側に記載する．
 
 3. データ取得，整形
+
+4. コマンド
+
+    pipenv install
+    pipenv run python3 private/csv_downloader.py
+    pipenv run python3 private/csv_seplitting.py
